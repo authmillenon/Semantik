@@ -607,6 +607,7 @@ Fortsetzungssemantik
 Hilfsfunktionen
 ===============
 * $\underline{\mathit{curry}}: (A \times B \to C) \to (A \to (B \to C))$, mit $\underline{\mathit{curry}}(f)(a)(b) := f\ a\ b$
+  \pagebreak
 * Projektion: 
 \begin{align*}
 \pi_i : (D_1 \times ... \times D_n)     & \to D_i \\
@@ -642,6 +643,8 @@ Hilfsfunktionen
         \end{cases}\\\\
         \underline{\mathit{length}} : D^* &\to \mathbb N_\bot \\
         \langle d_v\ |\ 1 \leq v \leq n \rangle &\mapsto n\\\\
+    \end{align*}
+    \begin{align*}
         \underline{\mathit{cons}} : (D \times D^*) &\to D^* \\
         (d, \langle d_v\ |\ 1 \leq v \leq n \rangle) &\mapsto \langle d, d_1, ..., d_n \rangle\\\\
         \underline{\mathit{cons}} : (D \times D^\omega) &\to D^\omega \\
