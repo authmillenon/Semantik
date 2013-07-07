@@ -559,6 +559,49 @@ Fortsetzungssemantik
         \mathit{ENV} &= \mathit{ID} \to (\mathit{LOC} + \{\underline{\mathit{ungebunden}}\}_\bot)\ \text{und}\\
         \mathit{STORE} &= \mathit{LOC} \to (\mathbb Z_\bot + \{\underline{\mathit{frei}}\}_\bot)
     \end{align*}
+* _**syntaktische Bereiche**_ wie in [WHILE-Syntax](#syntax-der-beispielsprache-while)
+* _**syntaktische Klauseln**_ wie in [WHILE-Syntax](#syntax-der-beispielsprache-while)
+* _**semantische Bereiche:**_
+    1. $\mathit{ZUSTAND} = \mathit{SPEICHER} \times \mathit{EINGABE} \times \mathit{AUSGABE}$
+    2. $\mathit{SPEICHER}: \mathit{ID} \to (\mathbb Z_\bot \cup \{\underline{\mathit{frei}}\}_\bot)$ (keine gemeinsamen Speicherplätze bei WHILE)
+    3. $\mathit{EINGABE} = \overline{\mathit{KON}}^*$
+    4. $\mathit{AUSGABE} = \overline{\mathit{KON}}^*$
+    5. $\mathit{FORTSETZUNG} = \mathit{ZUSTAND} \to (\mathit{ZUSTAND} + \{\underline{\mathit{Fehler}}\}_\bot)$
+    6. $\mathit{TERMFORT} = \mathbb{Z}_\bot \to \mathit{FORTSETZUNG}$
+    7. $\mathit{BOOLFORT} = \overline{\mathit{BOOL}}_\bot \to \mathit{FORTSETZUNG}$
+* _**Semantikfunktionen:**_
+    1. $\mathcal T : \mathit{TERM} \to \mathit{TERMFORT} \to \mathit{FORTSETZUNG}$,
+    2. $\mathcal B : \mathit{BT} \to \mathit{BOOLFORT} \to \mathit{FORTSETZUNG}$,
+    3. $\mathcal C : \mathit{COM} \to \mathit{FORTSETZUNG} \to \mathit{FORTSETZUNG}$ und
+    4. $\mathcal P : \mathit{PROG} \to \overline{\mathit{KON}}^* \to (\overline{\mathit{KON}}^* \cup \{\underline{\mathit{Fehler}}\}_\bot)$
+* _**semantische Klauseln:**_ Sei $z = (s, e, a) \in \mathit{ZUSTAND}$
+    1. **Semantik der Terme**
+        (a) $\forall \underline{n} \in \mathit{ZAHL} : \mathcal{T}\llbracket{\underline{n}}\rrbracket k = k\ n$, mit $n := \underline{n}$ entsprechenden Zahlwert $\in \mathbb Z$
+        (b) $\mathcal{T} \llbracket I \rrbracket k \langle s, e, a\rangle = s\ I = \underline{\mathit{frei}} \longrightarrow \underline{\mathit{Fehler}}, k(s\ I)\langle s, e, a \rangle$
+        (c) $\mathcal{T} \llbracket T_1 + T_2 \rrbracket k = \mathcal{T}\llbracket T_1 \rrbracket \lambda n_1 . \mathcal{T}\llbracket T_2 \rrbracket \lambda n_2 . k (n_1 + n_2)$
+        (d) analog für alle anderen arithmetischen Operationen
+        (e) $\mathcal{T} \llbracket \mathbf{read} \rrbracket k \langle s, e, a \rangle = \underline{\mathit{null}}\ e \longrightarrow \underline{\mathit{Fehler}}, 
+            \underline{\mathit{is}}_{\mathbb{Z}_\bot}(\underline{\mathit{hd}}\ e) \longrightarrow k (\underline{\mathit{hd}}\ e) \langle s, \underline{\mathit{tl}}\ e, a \rangle, \underline{\mathit{Fehler}}$
+    2. **Semantik der bool'schen Ausdrücke**
+        (a) $\mathcal{B} \llbracket\mathbf{true}\rrbracket g = g\ \mathit{wahr}$ 
+        (b) $\mathcal{B} \llbracket\mathbf{false}\rrbracket g = g\ \mathit{falsch}$ 
+        (c) $\mathcal{B} \llbracket\mathbf{not}\ B\rrbracket g = \mathcal{B}\llbracket B\rrbracket \lambda b.g(\neg b)$ 
+        (d) $\mathcal{B} \llbracket T_1 = T_2 \rrbracket g = \mathcal{T} \llbracket T_1 \rrbracket \lambda n_1 . \mathcal{T} \llbracket T_2 \rrbracket 
+                \lambda n_2 . g(n_1 = n_2)$
+        (e) analog für alle anderen bool'schen Operationen
+        (f) $\mathcal{B} \llbracket \mathbf{read} \rrbracket g \langle s, e, a \rangle = \underline{\mathit{null}}\ e \longrightarrow \underline{\mathit{Fehler}}, 
+            \underline{\mathit{is}}_{\overline{\mathit{BOOL}}_\bot}(\underline{\mathit{hd}}\ e) \longrightarrow g(\underline{\mathit{hd}}\ e) \langle s, \underline{\mathit{tl}}\ e, a \rangle, \underline{\mathit{Fehler}}$
+    3. **Semantik der Anweisungen**
+        (a) $\mathcal{C} \llbracket\mathbf{skip}\rrbracket c = c$
+        (b) $\mathcal{C} \llbracket I := T \rrbracket c = \mathcal{T} \llbracket T \rrbracket \lambda n (s, e, a).c\langle s[n/I], e, a\rangle$
+        (c) $\mathcal{C} \llbracket C_1; C_2 \rrbracket = \mathcal{C} \llbracket C_1 \rrbracket \circ \mathcal{C} \llbracket C_2 \rrbracket$
+        (d) $\mathcal{C} \llbracket\mathbf{if}\ B\ \mathbf{then}\ C_1\ \mathbf{else}\ C_2\rrbracket = \mathcal{B}\llbracket B \rrbracket
+            \underline{\mathit{cond}}\langle \mathcal{C}\llbracket C_1 \rrbracket, \mathcal{C}\llbracket C_2 \rrbracket\rangle$
+        (e) $\mathcal{C} \llbracket\mathbf{while}\ B\ \mathbf{do}\ C\rrbracket = \mathcal{B}\llbracket B \rrbracket \underline{\mathit{cond}}\langle\mathcal{C}\llbracket C \rrbracket \circ \mathcal{C}\llbracket \mathbf{while}\ B\ \mathbf{do}\ C\rrbracket, \underline{\mathit{id}} \rangle$
+        (f) $\mathcal{C} \llbracket\mathbf{output}\ T\rrbracket c = \mathcal{T} \llbracket{T}\rrbracket \lambda n (s,e,a).c\ \langle s, e, a.n\rangle$
+        (f) $\mathcal{C} \llbracket\mathbf{output}\ B\rrbracket c = \mathcal{B} \llbracket{B}\rrbracket \star \lambda b (s,e,a).c\ \langle s, e, a.b\rangle$
+    4. **Semantik der Programme:**\
+        $\mathcal{P}\llbracket C\rrbracket e = (\mathcal{C} \llbracket{C}\rrbracket \star \pi_3) \langle s_0, e, \varepsilon \rangle$, wobei $s_0 \in \mathit{SPEICHER}$ mit $\forall I \in \mathit{ID} : s_0\ I = \underline{\mathit{frei}}$
 
 Hilfsfunktionen
 ===============
