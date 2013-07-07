@@ -188,17 +188,83 @@ Reduktionssemantik
 Denotationelle Semantik
 =======================
 * Funktionale Definition der Semantik
-* Definition *Zustandsbereich*:
+* _**syntaktische Bereiche**_ wie in [WHILE-Syntax](#syntax-der-beispielsprache-while)
+* _**syntaktische Klauseln**_ wie in [WHILE-Syntax](#syntax-der-beispielsprache-while)
+* _**semantische Bereiche:**_
     1. $\mathit{ZUSTAND} = \mathit{SPEICHER} \times \mathit{EINGABE} \times \mathit{AUSGABE}$
     2. $\mathit{SPEICHER}: \mathit{ID} \to (\mathbb Z \cup \{\underline{\mathit{frei}}\})$
     3. $\mathit{EINGABE} = \overline{\mathit{KON}}^*$
     4. $\mathit{AUSGABE} = \overline{\mathit{KON}}^*$
-* Für WHILE: 4 Semantikfunktionen:
+* _**Semantikfunktionen:**_
     1. $\mathcal T : \mathit{TERM} \to (\mathit{ZUSTAND} \to (\mathbb{Z} \times \mathit{ZUSTAND}) \cup \{\underline{\mathit{Fehler}}\})$,
     2. $\mathcal B : \mathit{BT} \to (\mathit{ZUSTAND} \to ((\overline{\mathit{BOOL}} \times \mathit{ZUSTAND}) \cup \{\underline{\mathit{Fehler}}\}))$,
     3. $\mathcal C : \mathit{COM} \to (\mathit{ZUSTAND} \to (\mathit{ZUSTAND} \cup \{\underline{\mathit{Fehler}}\}))$ und
     4. $\mathcal P : \mathit{PROG} \to (\overline{\mathit{KON}}^* \to (\overline{\mathit{KON}}^* \cup \{\underline{\mathit{Fehler}}\}))$
-* Schreibweise z. B. $\mathcal T \llbracket n \rrbracket z = (n, z)$ für alle $n \in \mathit{ZAHL}$
+* _**semantische Klauseln:**_ Sei $z = (s, e, a) \in \mathit{ZUSTAND}$
+    1. **Semantik der Terme**
+        (a) $\forall \underline{n} \in \mathit{ZAHL} : \mathcal{T}\llbracket{\underline{n}}\rrbracket z = (n, z)$, mit $n := \underline{n}$ entsprechenden Zahlwert $\in \mathbb Z$
+        (b) $\mathcal{T} \llbracket x \rrbracket z = \begin{cases}
+                \underline{\mathit{Fehler}}, & s\ x = \underline{\mathit{frei}} \\
+                (s\ x, z)
+            \end{cases}$
+        (c) $\mathcal{T} \llbracket T_1 + T_2 \rrbracket z = \begin{cases}
+                \underline{\mathit{Fehler}}, & \mathcal{T}\llbracket{T_1}\rrbracket z = \underline{\mathit{Fehler}} \lor \mathcal{T}\llbracket{T_1}\rrbracket z = (n_1, z_1) \land T\llbracket{T_2}\rrbracket z_1 = \underline{\mathit{Fehler}}\\
+                (n_1 + n_2, z_2),            & \mathcal{T}\llbracket{T_1}\rrbracket z = (n_1, z_1) \land T\llbracket{T_2}\rrbracket z_1 = (n_2, z_2)
+            \end{cases}$
+        (d) analog für alle anderen arithmetischen Operationen
+        (e) $\mathcal{T} \llbracket \mathbf{read} \rrbracket z = \begin{cases}
+                \underline{\mathit{Fehler}} & e = \varepsilon \lor e = b.e' \\
+                (n, (s, e', a))             & e = n.e'
+            \end{cases}$
+    2. **Semantik der bool'schen Ausdrücke**
+        (a) $\mathcal{B} \llbracket\mathbf{true}\rrbracket z = (\mathit{wahr}, z)$ 
+        (b) $\mathcal{B} \llbracket\mathbf{false}\rrbracket z = (\mathit{false}, z)$ 
+        (c) $\mathcal{B} \llbracket\mathbf{not}\ B\rrbracket z = \begin{cases}
+                \underline{\mathit{Fehler}}, & \mathcal{B} \llbracket B \rrbracket z = \underline{\mathit{Fehler}} \\
+                (\neg b, z'), & \mathcal{B} \llbracket B \rrbracket z = (b, z')
+            \end{cases}$ 
+        (d) $\mathcal{B} \llbracket T_1 = T_2 \rrbracket z = \begin{cases}
+                \underline{\mathit{Fehler}}, & \mathcal{T}\llbracket{T_1}\rrbracket z = \underline{\mathit{Fehler}} \lor \mathcal{T}\llbracket{T_1}\rrbracket z = (n_1, z_1) \land T\llbracket{T_2}\rrbracket z_1 = \underline{\mathit{Fehler}}\\
+                (n_1 + n_2, z_2),            & \mathcal{T}\llbracket{T_1}\rrbracket z = (n_1, z_1) \land T\llbracket{T_2}\rrbracket z_1 = (n_2, z_2)
+            \end{cases}$
+        (e) analog für alle anderen bool'schen Operationen
+        (f) $\mathcal{B} \llbracket \mathbf{read} \rrbracket z = \begin{cases}
+                \underline{\mathit{Fehler}} & e = \varepsilon \lor e = n.e' \\
+                (b, (s, e', a))             & e = b.e'
+            \end{cases}$
+    3. **Semantik der Anweisungen**
+        (a) $\mathcal{C} \llbracket\mathbf{skip}\rrbracket z = z$
+        (b) $\mathcal{C} \llbracket I := T \rrbracket z = \begin{cases}
+                \underline{\mathit{Fehler}},    & \mathcal{T} \llbracket T \rrbracket z = \underline{\mathit{Fehler}}\\
+                (s[n/I], e', a),                & \mathcal{T} \llbracket T \rrbracket z = (n, (s, e', a))
+            \end{cases}$
+        (c) $\mathcal{C} \llbracket C_1; C_2 \rrbracket z = \begin{cases}
+                \underline{\mathit{Fehler}},    & \mathcal{C} \llbracket C_1 \rrbracket z = \underline{\mathit{Fehler}}\\
+                \mathcal{C} \llbracket C_2 \rrbracket(\mathcal{C} \llbracket C_1 \rrbracket z)
+            \end{cases}$
+        (d) $\mathcal{C} \llbracket\mathbf{if}\ B\ \mathbf{then}\ C_1\ \mathbf{else}\ C_2\rrbracket z = \begin{cases}
+                \underline{\mathit{Fehler}},                & \mathcal{B} \llbracket{B}\rrbracket z = \underline{\mathit{Fehler}} \\
+                \mathcal{C} \llbracket C_1 \rrbracket z',   & \mathcal{B} \llbracket{B}\rrbracket z = (\mathit{wahr}, z') \\
+                \mathcal{C} \llbracket C_2 \rrbracket z',   & \mathcal{B} \llbracket{B}\rrbracket z = (\mathit{falsch}, z') \\
+            \end{cases}$
+        (e) $\mathcal{C} \llbracket\mathbf{while}\ B\ \mathbf{do}\ C\rrbracket z = \begin{cases}
+                \underline{\mathit{Fehler}},                                                & \mathcal{B} \llbracket{B}\rrbracket z = \underline{\mathit{Fehler}} \\
+                \mathcal{C} \llbracket C; \mathbf{while}\ B\ \mathbf{do}\ C\rrbracket z',   & \mathcal{B} \llbracket{B}\rrbracket z = (\mathit{wahr}, z') \\
+                z'                                                                          & \mathcal{B} \llbracket{B}\rrbracket z = (\mathit{falsch}, z') \\
+            \end{cases}$
+        (f) $\mathcal{C} \llbracket\mathbf{output}\ T\rrbracket z = \begin{cases}
+                \underline{\mathit{Fehler}},    & \mathcal{T} \llbracket{T}\rrbracket z = \underline{\mathit{Fehler}} \\
+                (s, e', a.n),                   & \mathcal{T} \llbracket{T}\rrbracket z = (n, (s, e', a)) \\
+            \end{cases}$
+        (g) $\mathcal{C} \llbracket\mathbf{output}\ T\rrbracket z = \begin{cases}
+                \underline{\mathit{Fehler}},    & \mathcal{B} \llbracket{B}\rrbracket z = \underline{\mathit{Fehler}} \\
+                (s, e', a.b),                   & \mathcal{B} \llbracket{B}\rrbracket z = (b, (s, e', a)) \\
+            \end{cases}$
+    4. **Semantik der Programme:**\
+        $\mathcal{P}\llbracket C\rrbracket e = \begin{cases}
+            \underline{\mathit{Fehler}},    & \mathcal{C} \llbracket{C}\rrbracket (s_0, e, \varepsilon) = \underline{\mathit{Fehler}}, \\
+            a,                              & \mathcal{C} \llbracket{C}\rrbracket (s_0, e, \varepsilon) = (s, e', a)
+        \end{cases}$
 
 Axiomatische Semantik
 =====================
