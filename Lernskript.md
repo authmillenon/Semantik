@@ -290,7 +290,7 @@ Axiome für WHILE
 \{Q[\underline{\mathit{output}}.t/\underline{\mathit{output}}]\} & I := T \{Q\} 
 \end{align}
 * $t$ ist der semantische Term, der aus $T$ gewonnen wird
-* Schlussregeln und allgemeine Schlussregeln s. Hoare-Kalkül
+* Schlussregeln (Sequenzregel, Bedingungsregel, Schleifenregel) und allgemeine Schlussregeln (= Konsequenzregel) s. Hoare-Kalkül
 
 Semantische Bereiche (CPOs)
 ===========================
