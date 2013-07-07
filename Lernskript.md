@@ -284,12 +284,12 @@ Axiomatische Semantik
 Axiome für WHILE
 ================
 * logische Ausdrücke und Prädikate entsprechend Prädikatenlogik
-\begin{align}
+\begin{align*}
 \{Q\} & \mathbf{skip} \{Q\} \\
 \{Q[t/I]\} & I := T \{Q\} \\
 \{\neg \underline{\mathit{eof}} \land Q[\pi_1(\underline{\mathit{input}})/I]\} & I := T \{Q[I.\underline{\mathit{input}}/\underline{\mathit{input}}]\} \\
 \{Q[\underline{\mathit{output}}.t/\underline{\mathit{output}}]\} & I := T \{Q\} 
-\end{align}
+\end{align*}
 * $t$ ist der semantische Term, der aus $T$ gewonnen wird
 * Schlussregeln (Sequenzregel, Bedingungsregel, Schleifenregel) und allgemeine Schlussregeln (= Konsequenzregel) s. Hoare-Kalkül
 
@@ -621,19 +621,19 @@ Hilfsfunktionen
 \end{align*}
 * Listenoperationen:
     \begin{align*}
-        \mathit{hd} : D^* &\to D \\
+        \underline{\mathit{hd}} : D^* &\to D \\
         \langle d_v\ |\ 1 \leq v \leq n \rangle &\mapsto \begin{cases}
             d_1, & n \geq 1\\
             \bot_D, & n = 0
         \end{cases}\\\\
-        \mathit{hd} : D^\omega &\to D \\
+        \underline{\mathit{hd}} : D^\omega &\to D \\
         \langle d_v\ |\ v \in \mathbb N \rangle &\mapsto d_1\\\\
-        \mathit{tl} : D^* &\to D^* \\
+        \underline{\mathit{tl}} : D^* &\to D^* \\
         \langle d_v\ |\ 1 \leq v \leq n \rangle &\mapsto \begin{cases}
             \langle d_{v+1}\ |\ 1 \leq v \leq n-1\rangle, & n \geq 1\\
             \bot_{D^*}, & n = 0
         \end{cases}\\\\
-        \mathit{tl} : D^\omega &\to D^\omega \\
+        \underline{\mathit{tl}} : D^\omega &\to D^\omega \\
         \langle d_v\ |\ v \in \mathbb N \rangle &\mapsto \langle d_{v+1}\ |\ v \in \mathbb N \rangle\\\\
         \underline{\mathit{null}} : D^* &\to \overline{\mathit{BOOL}} \\
         \langle d_v\ |\ 1 \leq v \leq n \rangle &\mapsto \begin{cases}
@@ -654,7 +654,7 @@ Hilfsfunktionen
 * All diese Funktionen erhalten die cpo-Struktur und sind stetig
 * Selektionsfunktion:
     \begin{align*}
-        \mathit{out}_i (D_1 + ... + D_n) &\to D_i
+        \underline{\mathit{out}}_i (D_1 + ... + D_n) &\to D_i
         (d,j) &\mapsto \begin{cases}
             d, & i = j \\
             \bot_D
@@ -662,18 +662,18 @@ Hilfsfunktionen
     \end{align*}
 * Injektionsfunktion:
     \begin{align*}
-        \mathit{out}_i D_i &\to (D_1 + ... + D_n)
+        \underline{\mathit{out}}_i D_i &\to (D_1 + ... + D_n)
         d &\mapsto (d, i)
     \end{align*}
 * Testfunktion:
     \begin{align*}
-        \mathit{is}_i (D_1 + ... + D_n) &\to \overline{\mathit{BOOL}}\\
+        \underline{\mathit{is}}_i (D_1 + ... + D_n) &\to \overline{\mathit{BOOL}}\\
         (d,j) &\mapsto \begin{cases}
             \mathit{wahr}, & i = j \land d \neq \bot \\
             \mathit{falsch}, & i \neq j \land d \neq \bot \\
             \bot_{\overline{\mathit{BOOL}}}, & d = \bot
         \end{cases} \text{bzw.}\\
-        \mathit{is}_{D_i} (D_1 + ... + D_n) &\to \overline{\mathit{BOOL}} \\
+        \underline{\mathit{is}}_{D_i} (D_1 + ... + D_n) &\to \overline{\mathit{BOOL}} \\
         (d,j) &\mapsto \begin{cases}
             \mathit{wahr}, & D_i = D_j \land d \neq \bot \\
             \mathit{falsch}, & D_i \neq D_j \land d \neq \bot \\
