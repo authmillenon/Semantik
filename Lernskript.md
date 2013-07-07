@@ -218,7 +218,7 @@ Denotationelle Semantik
             \end{cases}$
     2. **Semantik der bool'schen Ausdrücke**
         (a) $\mathcal{B} \llbracket\mathbf{true}\rrbracket z = (\mathit{wahr}, z)$ 
-        (b) $\mathcal{B} \llbracket\mathbf{false}\rrbracket z = (\mathit{false}, z)$ 
+        (b) $\mathcal{B} \llbracket\mathbf{false}\rrbracket z = (\mathit{falsch}, z)$ 
         (c) $\mathcal{B} \llbracket\mathbf{not}\ B\rrbracket z = \begin{cases}
                 \underline{\mathit{Fehler}}, & \mathcal{B} \llbracket B \rrbracket z = \underline{\mathit{Fehler}} \\
                 (\neg b, z'), & \mathcal{B} \llbracket B \rrbracket z = (b, z')
@@ -259,12 +259,13 @@ Denotationelle Semantik
         (g) $\mathcal{C} \llbracket\mathbf{output}\ T\rrbracket z = \begin{cases}
                 \underline{\mathit{Fehler}},    & \mathcal{B} \llbracket{B}\rrbracket z = \underline{\mathit{Fehler}} \\
                 (s, e', a.b),                   & \mathcal{B} \llbracket{B}\rrbracket z = (b, (s, e', a)) \\
-            \end{cases}$
+            \end{cases}$\
     4. **Semantik der Programme:**\
         $\mathcal{P}\llbracket C\rrbracket e = \begin{cases}
             \underline{\mathit{Fehler}},    & \mathcal{C} \llbracket{C}\rrbracket (s_0, e, \varepsilon) = \underline{\mathit{Fehler}}, \\
             a,                              & \mathcal{C} \llbracket{C}\rrbracket (s_0, e, \varepsilon) = (s, e', a)
-        \end{cases}$
+        \end{cases}$,\
+             wobei $s_0 \in \mathit{SPEICHER}$ mit $\forall I \in \mathit{ID} : s_0\ I = \underline{\mathit{frei}}$
 
 Axiomatische Semantik
 =====================
@@ -526,16 +527,16 @@ Direkte denotationelle Semantik
         (c) $\mathcal{T} \llbracket T_1 + T_2 \rrbracket = \mathcal{T}\llbracket T_1 \rrbracket \star \lambda n_1 . \mathcal{T}\llbracket T_2 \rrbracket \star \lambda n_2z . \langle n_1 + n_2, z \rangle$
         (d) analog für alle anderen arithmetischen Operationen
         (e) $\mathcal{T} \llbracket \mathbf{read} \rrbracket \langle s, e, a \rangle = \underline{\mathit{null}}\ e \longrightarrow \underline{\mathit{Fehler}}, 
-            \underline{\mathit{is}}_{\mathbb{Z}_\bot}(\underline{\mathit{hd}}\ e) \longrightarrow \langle \underline{\mathit{hd}}\ e, \langle s, \underline{\mathit{tl}}\ e \rangle\rangle, \underline{\mathit{Fehler}}$
+            \underline{\mathit{is}}_{\mathbb{Z}_\bot}(\underline{\mathit{hd}}\ e) \longrightarrow \langle \underline{\mathit{hd}}\ e, \langle s, \underline{\mathit{tl}}\ e, a \rangle\rangle, \underline{\mathit{Fehler}}$
     2. **Semantik der bool'schen Ausdrücke**
         (a) $\mathcal{B} \llbracket\mathbf{true}\rrbracket z = \langle\mathit{wahr}, z\rangle$ 
-        (b) $\mathcal{B} \llbracket\mathbf{false}\rrbracket z = \langle\mathit{false}, z\rangle$ 
-        (c) $\mathcal{B} \llbracket\mathbf{not}\ B\rrbracket = \mathcal\llbracket B\rrbracket \star \lambda bz.\langle \neg b, z\rangle$ 
+        (b) $\mathcal{B} \llbracket\mathbf{false}\rrbracket z = \langle\mathit{falsch}, z\rangle$ 
+        (c) $\mathcal{B} \llbracket\mathbf{not}\ B\rrbracket = \mathcal{B}\llbracket B\rrbracket \star \lambda bz.\langle \neg b, z\rangle$ 
         (d) $\mathcal{B} \llbracket T_1 = T_2 \rrbracket = \mathcal{T} \llbracket T_1 \rrbracket \star \lambda n_1 . \mathcal{T} \llbracket T_2 \rrbracket 
                 \star \lambda n_2 z . \langle n_1 = n_2, z\rangle$
         (e) analog für alle anderen bool'schen Operationen
         (f) $\mathcal{B} \llbracket \mathbf{read} \rrbracket \langle s, e, a \rangle = \underline{\mathit{null}}\ e \longrightarrow \underline{\mathit{Fehler}}, 
-            \underline{\mathit{is}}_{\overline{\mathit{BOOL}}_\bot}(\underline{\mathit{hd}}\ e) \longrightarrow \langle \underline{\mathit{hd}}\ e, \langle s, \underline{\mathit{tl}}\ e \rangle\rangle, \underline{\mathit{Fehler}}$
+            \underline{\mathit{is}}_{\overline{\mathit{BOOL}}_\bot}(\underline{\mathit{hd}}\ e) \longrightarrow \langle \underline{\mathit{hd}}\ e, \langle s, \underline{\mathit{tl}}\ e, a \rangle\rangle, \underline{\mathit{Fehler}}$
     3. **Semantik der Anweisungen**
         (a) $\mathcal{C} \llbracket\mathbf{skip}\rrbracket z = z$
         (b) $\mathcal{C} \llbracket I := T \rrbracket = \mathcal{T} \llbracket T \rrbracket \star \lambda n (s, e, a).\langle s[n/I], e, a\rangle$
@@ -546,7 +547,7 @@ Direkte denotationelle Semantik
         (f) $\mathcal{C} \llbracket\mathbf{output}\ T\rrbracket = \mathcal{T} \llbracket{T}\rrbracket \star \lambda n (s,e,a).\langle s, e, a.n\rangle$
         (f) $\mathcal{C} \llbracket\mathbf{output}\ B\rrbracket = \mathcal{B} \llbracket{B}\rrbracket \star \lambda b (s,e,a).\langle s, e, a.b\rangle$
     4. **Semantik der Programme:**\
-        $\mathcal{P}\llbracket C\rrbracket e = (\mathcal{C} \llbracket{C}\rrbracket \star \pi_3) \langle s_0, e, \varepsilon \rangle$
+        $\mathcal{P}\llbracket C\rrbracket e = (\mathcal{C} \llbracket{C}\rrbracket \star \pi_3) \langle s_0, e, \varepsilon \rangle$, wobei $s_0 \in \mathit{SPEICHER}$ mit $\forall I \in \mathit{ID} : s_0\ I = \underline{\mathit{frei}}$
 
 Fortsetzungssemantik
 --------------------
