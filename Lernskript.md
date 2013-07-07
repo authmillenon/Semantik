@@ -1,6 +1,33 @@
 % Semantik — Lernskript
 % Martin Lenders
 
+Syntax der Beispielsprache WHILE
+================================
+1. Elementare Einheiten
+$$\begin{array}{rll}
+    \hline
+    \multicolumn{2}{l}{\textbf{Syntaxregel}}    & \textbf{Erzeugter syntaktischer Bereich} \\\hline
+    Z &::= \underline{0}\ |\ \underline{1}\ |\ ...\ |\ \underline{-1}\ |\ \underline{-2}\ |\ ... & \mathit{ZAHL}\ \text{(Zahlen)} \\
+    W &::= \mathbf{true}\ |\ \mathbf{false}     & \mathit{BOOL}\ \text{(Wahrheitswerte)} \\
+    K &::= Z\ |\ W                              & \mathit{KON}\ \text{(Konstanten)} \\
+    I &::= a\ |\ b\ |\ ...\ |\ x\ |\ a_1\ |\ a_2\ |\ ...\ |\ x_1\ |\ x_2\ |\ ... & \mathit{ID}\ \text{(identifier = Variablen)} \\
+    \underline{\mathit{OP}} &::= +\ |\ -\ |\ *\ |\ \div\ |\ \underline{mod} & \mathit{OP}\ \text{(Arithmetische Operationen)} \\
+    \underline{\mathit{BOP}} &::=\ =\ |\ <\ |\ >\ |\ \leq\ |\ \geq\ |\ \neq & \mathit{BOP}\ \text{(Bool'sche Operationen)} \\
+    \hline
+\end{array}$$
+
+2. Induktiv aufgebaute Einheiten
+$$\begin{array}{rll}
+    \hline
+    \multicolumn{2}{l}{\textbf{Syntaxregel}}    & \textbf{Erzeugter syntaktischer Bereich} \\\hline
+    T &::= Z\ |\ I\ |\ T_1\ \operatorname{\underline{\mathit{OP}}}\ T_2\ |\ \mathbf{read} & \mathit{TERM}\ \text{(arithmetische Ausdrücke)} \\ 
+    B &::= W\ |\ \operatorname{\mathbf{not}} B\ |\ T_1\ \operatorname{\underline{\mathit{BOP}}}\ T_2\ |\ \mathbf{read} & \mathit{BT}\ \text{(bool'sche Ausdrücke)} \\ 
+    C &::= \mathbf{skip}\ |\ I := T\ |\ C_1;C_2\ |\ \mathbf{if}\ B\ \mathbf{then}\ C_1\ \mathbf{else}\ C_2\ |\ & \mathit{COM}\ \text{(Anweisungen)} \\
+      &\qquad \mathbf{while}\ B\ \mathbf{do}\ C\ |\ \mathbf{output}\ T\ |\ \mathbf{input}\ B \\ 
+    P &::= C                                    & \mathit{PROG}\ \text{(Programme)}\\
+    \hline
+\end{array}$$
+
 Operationelle Semantik
 ======================
 * Definition einer abstrakten Maschine zur Ausführung von Programmen
@@ -15,14 +42,15 @@ Operationelle Semantik
     2. $\Delta(z) = z$ (Programm terminiert) und
     3. $\forall k < n : \Delta^k(z_{P,E}) \neq \Delta^{k+1}(z_{P,E})$ (Eindeutigkeit der Semantikfunktion)
 
-WSKEA-Maschine
---------------
+WSKEA-Maschine für WHILE
+------------------------
 * Abstrakte Maschine im obigen Sinne zur Ausführung von WHILE-Programmen
     (i) $\mathcal Z = \mathcal W \times \mathcal S \times \mathcal K \times \mathcal E \times \mathcal A$, 
         mit $\langle W | S | K | E | A \rangle \in \mathcal Z$
         * Wertekeller $W$
         * Speicher $S: \mathit{ID} \to \mathit{ZAHL} \cup \{\underline{\mathit{frei}}\}$
-        * Kontrollkeller $K$
+        * Kontrollkeller $K$: Programmkomponenten, sowie Symbole für spezielle Operationen:
+            - $\underline{\mathit{not}}, \underline{\mathit{if}}, \underline{\mathit{assign}}, \underline{\mathit{while}}, \underline{\mathit{output}}$
         * Eingabe $E$
         * Ausgabe $A$
     (ii) $z_{P,E} = \langle \varepsilon | S_0 | P.\varepsilon | E | \varepsilon \rangle$
@@ -30,7 +58,61 @@ WSKEA-Maschine
     (iii) Induktive Definition von $\Delta$ über den Aufbau der 
           Programmkomponenten, die momentan auf der Programmspitze
           liegen
-* Operationelle Semantik $\mathcal O : \mathit{PROG} \to [\overline{\mathit{KON}}^* \to \overline{\mathit{KON}}^* \cup \{\underline{\mathit{Fehler}}\}]$:
+ * **Definition von $\Delta$:** Sei $z \in \mathcal Z$
+    1. $z = \langle W | S | T.K | E | A \rangle$ mit $T \in \mathit{TERM}$ 
+        (a) $\forall \underline{n} \in \mathit{ZAHL}: \Delta \langle W | S | \underline{n}.K | E | A \rangle := \langle \underline{n}.W | S | K | E | A \rangle$
+        (b) $\forall x \in \mathit{ID}: \Delta \langle W | S | x.K | E | A \rangle := \langle S(x).W | S | K | E | A \rangle$
+        (c) $\forall T_1, T_2 \in \mathit{TERM}, \underline{\mathit{OP}} \in \mathit{OP}: \Delta \langle W | S | T_1\ \operatorname{\underline{\mathit{OP}}}\ T_2.K | E | A \rangle := \langle W | S | T_1.T_2.\underline{\mathit{OP}}.K | E | A \rangle$
+        (d) wenn $\underline{n_1+n_2}$, $\underline{n_1}, \underline{n_2} \in \mathit{ZAHL}$: 
+            $$\Delta \langle \underline{n_1}.\underline{n_2}.W | S | +.K | E | A \rangle := \langle \underline{n_1 + n_2}.W | S | K | E | A \rangle$$
+        (e) analog für alle anderen arithmetischen Operationen
+        (f) $\forall \underline{n} \in \mathit{ZAHL}: \Delta \langle W | S | \mathbf{read}.K | \underline{n}.E | A \rangle := \langle \underline{n}.W | S | K | E | A \rangle$
+    2. $z = \langle W | S | B.K | E | A \rangle$ mit $B \in \mathit{BT}$ 
+        (a) $\Delta \langle W | S | \mathbf{true}.K | E | A \rangle := \langle \mathbf{true}.W | S | K | E | A \rangle$
+        (b) $\Delta \langle W | S | \mathbf{false}.K | E | A \rangle := \langle \mathbf{false}.W | S | K | E | A \rangle$
+        (c) $\Delta \langle W | S | \mathbf{not}\ B.K | E | A \rangle := \langle W | S | B.\underline{\mathit{not}}.K | E | A \rangle$
+        (d) $\forall b \in \mathit{BOOL}: \Delta \langle b.W | S | \underline{\mathit{not}}.K | E | A \rangle := \langle \neg b.W | S | K | E | A \rangle$\
+            mit $\neg b := \begin{cases}
+                    \mathbf{false}, & b = \mathbf{true} \\
+                    \mathbf{true},  & b = \mathbf{false}
+                \end{cases}$
+        (e) $\forall T_1, T_2 \in \mathit{TERM}, \underline{\mathit{BOP}} \in \mathit{BOP}: $
+            $$\Delta \langle W | S | T_1\ \operatorname{\underline{\mathit{BOP}}}\ T_2.K | E | A \rangle := \langle W | S | T_1.T_2.\underline{\mathit{BOP}}.K | E | A \rangle$$
+        (f) $\forall n_1, n_2 \in \mathit{BOOL} : \Delta \langle \underline{n_1}.\underline{n_2}.W | S | +.K | E | A \rangle := \langle \underline{n_1 = n_2}.W | S | K | E | A \rangle$\
+            mit $\underline{\mathit{wahr}} = \mathbf{true}$ und $\underline{\mathit{falsch}} = \mathbf{false}$
+        (g) analog für alle anderen bool'schen Operationen
+        (h) $\forall b \in \mathit{BOOL}: \Delta \langle W | S | \mathbf{read}.K | b.E | A \rangle = \langle b.W | S | K | E | A \rangle$
+    3. $z = \langle W | S | C.K | E | A \rangle$ mit $C \in \mathit{COM}$
+        (a) $\Delta \langle W | S | \mathbf{skip}.K | E | A \rangle := \langle W | S | K | E | A \rangle$
+        (b) $\forall I \in \mathit{ID}, T \in \mathit{TERM}: \Delta \langle W | S | I := T.K | E | A \rangle := \langle I.W | S | T.\underline{\mathit{assign}}.K | E | A \rangle$
+        (c) $\forall I \in \mathit{ID}, \underline{n} \in \mathit{ZAHL}: \Delta \langle \underline{n}.I.W | S | \underline{\mathit{assign}}.K | E | A \rangle := \langle W | S[\underline{n}/I] | K | E | A \rangle$\
+            mit $S[\underline{n}/I](x) := \begin{cases}
+                    \underline{n}, & x = I \\
+                    S(x) & x \neq I
+                \end{cases}$
+        (d) $\forall C_1, C_2 \in \mathit{COM}: \Delta \langle W | S | C_1;C_2.K | E | A \rangle := \langle W | S | C_1.C_2.K | E | A \rangle$
+        (e) $\forall B \in \mathit{BT}, C_1, C_2 \in \mathit{COM}: $
+            $$\Delta \langle W | S | \mathbf{if}\ B\ \mathbf{then}\ C_1\ \mathbf{else}\ C_2.K | E | A \rangle := \langle W | S | B.\underline{\mathit{if}}.C_1.C_2.K | E | A \rangle$$
+        (f) $\forall C_1, C_2 \in \mathit{COM}: \Delta \langle \mathbf{true}.W | S | \underline{\mathit{if}}.C_1.C_2.K | E | A \rangle := \langle W | S | C_1.K | E | A \rangle$
+        (g) $\forall C_1, C_2 \in \mathit{COM}: \Delta \langle \mathbf{false}.W | S | \underline{\mathit{if}}.C_1.C_2.K | E | A \rangle := \langle W | S | C_2.K | E | A \rangle$
+        (h) $\forall B \in \mathit{BT}, C \in \mathit{COM}: $
+            $$\Delta \langle W | S | \mathbf{while}\ B\ \mathbf{do}\ C.K | E | A \rangle := \langle C.B.W | S | B.\underline{\mathit{while}}.C.K | E | A \rangle$$
+        (i) $\forall B \in \mathit{BT}, C \in \mathit{COM}: $
+            $$\Delta \langle \mathbf{true}.C.B.W | S | \underline{\mathit{while}}.K | E | A \rangle := \langle W | S | C;\mathbf{while}\ B\ \mathbf{do}\ C.K | E | A \rangle$$
+        (j) $\forall B \in \mathit{BT}, C \in \mathit{COM}: $
+            $$\Delta \langle \mathbf{false}.C.B.W | S | \underline{\mathit{while}}.K | E | A \rangle := \langle W | S | K | E | A \rangle$$
+        (k) $\forall T \in \mathit{T}: \Delta \langle W | S | \mathbf{output}\ T.K | E | A \rangle := \langle W | S | T.\underline{\mathit{output}}.K | E | A \rangle$
+        (l) $\forall \underline{n} \in \mathit{ZAHL}: \Delta \langle \underline{n}.W | S | \underline{\mathit{output}}.K | E | A \rangle := \langle W | S | K | E | A.\underline{n} \rangle$
+        (k) analog $\forall B \in \mathit{BT}: \Delta \langle W | S | \mathbf{output}\ B.K | E | A \rangle$
+    4. $z = \langle W | S | \varepsilon | E | A \rangle$\
+        $\Delta \langle W | S | \varepsilon | E | A \rangle = \langle W | S | \varepsilon | E | A \rangle$ 
+ * formale Semantik nicht auf *Namen* für die Konstanten, sondern direkt auf *mathematischen Wertebereich*
+    \begin{align*}
+        \Rightarrow&&   \mathbb Z &:= \{..., -2, -1, 0, 1, 2, ...\} \\ 
+                   &&   \overline{\mathit{BOOL}} &:= \{\mathit{wahr}, \mathit{falsch}\} \\
+                   &&   \overline{\mathit{KON}} &:= \mathbb Z \cup \overline{\mathit{BOOL}}
+    \end{align*} 
+ * Operationelle Semantik $\mathcal O : \mathit{PROG} \to [\overline{\mathit{KON}}^* \to \overline{\mathit{KON}}^* \cup \{\underline{\mathit{Fehler}}\}]$:
     $$\mathcal O(P)(\overline E) := \begin{cases}
         \overline A, & \exists n \in \mathbb{N}: \Delta^n(z_{P,E}) = \Delta^{n+1}(z_{P,E}) \land \Pi_5(\Delta^n(z_{P,E})) = A \\
         \underline{\mathit{Fehler}}, & \exists n \in \mathbb{N}: \Delta^n(z_{P,E}) = \text{n. d.}\\
@@ -46,6 +128,53 @@ Reduktionssemantik
       von $P$ mit Speicher $S$, Eingabe $E$ und Ausgabe $A$ den „Wert“
       $P'$ ergibt und den Speicher in $S'$, die Eingabe in $E'$ und 
       die Ausgabe in $A'$ transformiert. 
+* $\overset{*}\Longrightarrow$ ist die reflexive, transitive Hülle von $\Longrightarrow$
+* **Definition für WHILE**:
+    1. $\mathit{TERM}$
+        \begin{align*}
+            \text{(a)} & & \text{wenn } S(x) \neq \underline{\mathit{frei}}{:} \\
+                       & & (x, (S, E, A)) &\Longrightarrow (S(x), (S, E, A))\\
+            \text{(b)} & & \text{wenn } (T_1, (S, E, A)) &\Longrightarrow (T'_1, (S, E, A)){:} \\
+                       & & (T_1\ \operatorname{\underline{\mathit{OP}}}\ T_2, (S, E, A)) &\Longrightarrow (T'_1\ \operatorname{\underline{\mathit{OP}}}\ T_2, (S, E, A))\\
+            \text{(c)} & & \text{wenn } (T, (S, E, A)) &\Longrightarrow (T', (S, E, A)){:} \\
+                       & & (\underline{n}\ \operatorname{\underline{\mathit{OP}}}\ T_2, (S, E, A)) &\Longrightarrow (\underline{n}\ \operatorname{\underline{\mathit{OP}}}\ T_2, (S, E, A))\\
+            \text{(d)} & & \text{wenn $\underline{n_1 + n_2} \in \mathit{ZAHL}$} {:} \\
+                       & & (\underline{n}\ \operatorname{\underline{\mathit{OP}}}\ T_2, (S, E, A)) &\Longrightarrow (\underline{n}\ \operatorname{\underline{\mathit{OP}}}\ T_2, (S, E, A))\\
+            \text{(e)} & & \text{analog für alle anderen }&\text{arithmetischen Operationen} \\
+            \text{(f)} & & (\mathbf{read}, (S, \underline{n}.E, A)) &\Longrightarrow (\underline{n}, (S, E, A))
+        \end{align*}
+    2. $\mathit{BT}$
+        \begin{align*}
+            \text{(a)} & & \text{wenn } (B, (S, E, A)) &\Longrightarrow (B', (S, E', A)){:} \\
+                       & & (\mathbf{not}\ B, (S, E, A)) &\Longrightarrow (\mathbf{not}\ B', (S, E', A))\\
+            \text{(b)} & & & \text{wenn } b \in \{\mathbf{true}, \mathbf{false}\}{:} \\
+                       & & (\mathbf{not}\ b, (S, E, A)) &\Longrightarrow (\neg b, (S, E, A))\\
+            \text{(c)} & & (T_1\ \operatorname{\underline{\mathit{OP}}}\ T_2, (S, E, A))& \text{ analog zu 1b - 1e} \\
+            \text{(d)} & & (\mathbf{read}, (S, b.E, A)) &\Longrightarrow (b, (S, E, A))
+        \end{align*}
+    3. $\mathit{COM}$ 
+        \begin{align*}
+            \text{(a)} & & (\mathbf{skip}; C, (S, E, A)) &\Longrightarrow (C, (S, E, A))\\
+            \text{(b)} & & \text{wenn } (T, (S, E, A)) &\overset{*}\Longrightarrow (\underline{n}, (S, E, A)){:} \\
+                       & & (I := T, (S, E, A)) &\Longrightarrow (\mathbf{skip}, (S[\underline{n}/I], E, A))\\
+            \text{(c)} & & \text{wenn } (C_1, (S, E, A)) &\Longrightarrow (C'_1, (S, E, A)){:} \\
+                       & & (C_1;C_2, (S, E, A)) &\Longrightarrow (C'_1;C_2, (S, E, A))\\
+            \text{(d)} & & \text{wenn } (B, (S, E, A)) &\overset{*}\Longrightarrow (\mathbf{true}, (S, E, A)){:} \\
+        \end{align*}
+        \begin{align*}
+                       & & (\mathbf{if}\ B\ \mathbf{then}\ C_1\ \mathbf{else}\ C_2, (S, E, A)) &\Longrightarrow (C_1, (S, E, A))\\
+            \text{(e)} & & \text{wenn } (B, (S, E, A)) &\overset{*}\Longrightarrow (\mathbf{false}, (S, E, A)){:} \\
+                       & & (\mathbf{if}\ B\ \mathbf{then}\ C_1\ \mathbf{else}\ C_2, (S, E, A)) &\Longrightarrow (C_2, (S, E, A))\\
+            \text{(f)} & & \text{wenn } (B, (S, E, A)) &\overset{*}\Longrightarrow (\mathbf{true}, (S, E, A)){:} \\
+                       & & (\mathbf{while}\ B\ \mathbf{do}\ C, (S, E, A)) &\Longrightarrow (C; \mathbf{while}\ B\ \mathbf{do}\ C, (S, E, A))\\
+            \text{(g)} & & \text{wenn } (B, (S, E, A)) &\overset{*}\Longrightarrow (\mathbf{false}, (S, E, A)){:} \\
+                       & & (\mathbf{while}\ B\ \mathbf{do}\ C, (S, E, A)) &\Longrightarrow (\mathbf{skip}, (S, E, A))\\
+            \text{(h)} & & \text{wenn } (T, (S, E, A)) &\overset{*}\Longrightarrow (\underline{n}, (S, E, A)){:} \\
+                       & & (\mathbf{output}\ T, (S, E, A)) &\Longrightarrow (\underline{n}, (S, E, A))\\
+            \text{(h)} & & \text{wenn } (B, (S, E, A)) &\overset{*}\Longrightarrow (b, (S, E, A)){:} \\
+                       & & (\mathbf{output}\ B, (S, E, A)) &\Longrightarrow (b, (S, E, A))\\
+        \end{align*}
+
 * Reduktionssemantik $\mathit{eval} : \mathit{PROG} \to [\overline{\mathit{KON}}^* \to \overline{\mathit{KON}}^* \cup \{\underline{\mathit{Fehler}}\}]$:
     $$\mathit{eval}(P)(\overline E) := \begin{cases}
         \overline A, & (C, (S_0, E, \varepsilon)) \Longrightarrow (\mathbf{skip}, (S, E', A)), \text{mit $S, E'$ bel.} \\
@@ -151,7 +280,7 @@ Elementare Bereiche
   mit 
     1. $\forall m \in M \cup \{\bot_M\} : \bot_M \sqsubseteq_M m$ und
     2. $\forall m_1, m_2 \in M : m_1 \sqsubseteq m_2 \Leftrightarrow m_1 = m_2$
-* z. B. semantischer Bereich $\mathbb N_\bot$), $\mathit{\overline{BOOL}} = \{\mathit{wahr}, \mathit{falsch}\}_\bot$
+* z. B. semantischer Bereich $\mathbb N_\bot$), $\mathit{\overline{\mathit{BOOL}}} = \{\mathit{wahr}, \mathit{falsch}\}_\bot$
 
 ### Kartesische Produkte und Folgen
 * Geg.: semantische Bereiche $D_1, ..., D_n, n \in \mathbb N$
