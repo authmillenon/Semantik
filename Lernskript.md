@@ -507,6 +507,46 @@ Direkte denotationelle Semantik
         $$f \star g = \lambda x . f\ x = \underline{\mathit{Fehler}} \longrightarrow \underline{\mathit{Fehler}}, f\ x = d \longrightarrow g\ d$$
     2. Geg. $f: D_1 \to ((D_2 \times ... \times D_n) + \{\underline{\mathit{Fehler}}\}_\bot)$ und $g : D_2 \to ... \to D_n \to (D_{n+1} + \{\underline{\mathit{Fehler}}\}_\bot)$
         $$f \star g = \lambda x . f\ x = \underline{\mathit{Fehler}} \longrightarrow \underline{\mathit{Fehler}}, f\ x = \langle d_2, ..., d_n \rangle \longrightarrow g\ d_2\ ...\ d_n$$
+* _**syntaktische Bereiche**_ wie in [WHILE-Syntax](#syntax-der-beispielsprache-while)
+* _**syntaktische Klauseln**_ wie in [WHILE-Syntax](#syntax-der-beispielsprache-while)
+* _**semantische Bereiche:**_
+    1. $\mathit{ZUSTAND} = \mathit{SPEICHER} \times \mathit{EINGABE} \times \mathit{AUSGABE}$
+    2. $\mathit{SPEICHER}: \mathit{ID} \to (\mathbb Z_\bot \cup \{\underline{\mathit{frei}}\}_\bot)$
+    3. $\mathit{EINGABE} = \overline{\mathit{KON}}^*$
+    4. $\mathit{AUSGABE} = \overline{\mathit{KON}}^*$
+* _**Semantikfunktionen:**_
+    1. $\mathcal T : \mathit{TERM} \to (\mathit{ZUSTAND} \to \mathbb{Z}_\bot \times \mathit{ZUSTAND}) \cup \{\underline{\mathit{Fehler}}\}_\bot)$,
+    2. $\mathcal B : \mathit{BT} \to (\mathit{ZUSTAND} \to ((\overline{\mathit{BOOL}} \times \mathit{ZUSTAND}) \cup \{\underline{\mathit{Fehler}}\}_\bot))$,
+    3. $\mathcal C : \mathit{COM} \to (\mathit{ZUSTAND} \to (\mathit{ZUSTAND} \cup \{\underline{\mathit{Fehler}}\}_\bot))$ und
+    4. $\mathcal P : \mathit{PROG} \to (\overline{\mathit{KON}}^* \to (\overline{\mathit{KON}}^* \cup \{\underline{\mathit{Fehler}}\}_\bot))$
+* _**semantische Klauseln:**_ Sei $z = (s, e, a) \in \mathit{ZUSTAND}$
+    1. **Semantik der Terme**
+        (a) $\forall \underline{n} \in \mathit{ZAHL} : \mathcal{T}\llbracket{\underline{n}}\rrbracket z = \langle n, z\rangle$, mit $n := \underline{n}$ entsprechenden Zahlwert $\in \mathbb Z$
+        (b) $\mathcal{T} \llbracket I \rrbracket \langle s, e, a\rangle = s\ I = \underline{\mathit{frei}} \longrightarrow \underline{\mathit{Fehler}}, \langle s\ I, \langle s, e, a \rangle \rangle$
+        (c) $\mathcal{T} \llbracket T_1 + T_2 \rrbracket = \mathcal{T}\llbracket T_1 \rrbracket \star \lambda n_1 . \mathcal{T}\llbracket T_2 \rrbracket \star \lambda n_2z . \langle n_1 + n_2, z \rangle$
+        (d) analog für alle anderen arithmetischen Operationen
+        (e) $\mathcal{T} \llbracket \mathbf{read} \rrbracket \langle s, e, a \rangle = \underline{\mathit{null}}\ e \longrightarrow \underline{\mathit{Fehler}}, 
+            \underline{\mathit{is}}_{\mathbb{Z}_\bot}(\underline{\mathit{hd}}\ e) \longrightarrow \langle \underline{\mathit{hd}}\ e, \langle s, \underline{\mathit{tl}}\ e \rangle\rangle, \underline{\mathit{Fehler}}$
+    2. **Semantik der bool'schen Ausdrücke**
+        (a) $\mathcal{B} \llbracket\mathbf{true}\rrbracket z = \langle\mathit{wahr}, z\rangle$ 
+        (b) $\mathcal{B} \llbracket\mathbf{false}\rrbracket z = \langle\mathit{false}, z\rangle$ 
+        (c) $\mathcal{B} \llbracket\mathbf{not}\ B\rrbracket = \mathcal\llbracket B\rrbracket \star \lambda bz.\langle \neg b, z\rangle$ 
+        (d) $\mathcal{B} \llbracket T_1 = T_2 \rrbracket = \mathcal{T} \llbracket T_1 \rrbracket \star \lambda n_1 . \mathcal{T} \llbracket T_2 \rrbracket 
+                \star \lambda n_2 z . \langle n_1 = n_2, z\rangle$
+        (e) analog für alle anderen bool'schen Operationen
+        (f) $\mathcal{B} \llbracket \mathbf{read} \rrbracket \langle s, e, a \rangle = \underline{\mathit{null}}\ e \longrightarrow \underline{\mathit{Fehler}}, 
+            \underline{\mathit{is}}_{\overline{\mathit{BOOL}}_\bot}(\underline{\mathit{hd}}\ e) \longrightarrow \langle \underline{\mathit{hd}}\ e, \langle s, \underline{\mathit{tl}}\ e \rangle\rangle, \underline{\mathit{Fehler}}$
+    3. **Semantik der Anweisungen**
+        (a) $\mathcal{C} \llbracket\mathbf{skip}\rrbracket z = z$
+        (b) $\mathcal{C} \llbracket I := T \rrbracket = \mathcal{T} \llbracket T \rrbracket \star \lambda n (s, e, a).\langle s[n/I], e, a\rangle$
+        (c) $\mathcal{C} \llbracket C_1; C_2 \rrbracket = \mathcal{C} \llbracket C_1 \rrbracket \star \mathcal{C} \llbracket C_2 \rrbracket$
+        (d) $\mathcal{C} \llbracket\mathbf{if}\ B\ \mathbf{then}\ C_1\ \mathbf{else}\ C_2\rrbracket = \mathcal{B}\llbracket B \rrbracket \star
+            \underline{\mathit{cond}}\langle \mathcal{C}\llbracket C_1 \rrbracket, \mathcal{C}\llbracket C_2 \rrbracket\rangle$
+        (e) $\mathcal{C} \llbracket\mathbf{while}\ B\ \mathbf{do}\ C\rrbracket = \mathcal{B}\llbracket B \rrbracket \star \underline{\mathit{cond}}\langle\mathcal{C}\llbracket C \rrbracket \star \mathcal{C}\llbracket \mathbf{while}\ B\ \mathbf{do}\ C\rrbracket, \lambda z.z \rangle$
+        (f) $\mathcal{C} \llbracket\mathbf{output}\ T\rrbracket = \mathcal{T} \llbracket{T}\rrbracket \star \lambda n (s,e,a).\langle s, e, a.n\rangle$
+        (f) $\mathcal{C} \llbracket\mathbf{output}\ B\rrbracket = \mathcal{B} \llbracket{B}\rrbracket \star \lambda b (s,e,a).\langle s, e, a.b\rangle$
+    4. **Semantik der Programme:**\
+        $\mathcal{P}\llbracket C\rrbracket e = (\mathcal{C} \llbracket{C}\rrbracket \star \pi_3) \langle s_0, e, \varepsilon \rangle$
 
 Fortsetzungssemantik
 --------------------
