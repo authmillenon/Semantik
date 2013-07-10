@@ -317,6 +317,8 @@ Monotonie, Stetigkeit, Striktheit
         $$[A \to B]$$
 
 * **Lemma:** wenn $f \in [A \to B]$, dann ist $f$ auch monoton
+    + *Beweis*:
+        $$f(a_1) = \bigsqcup\{f(a_1),f(a_2)\} = f(\bigsqcup\{a_1,a_2\}) = f(a_2)$$
 * Klasse der stetigen Funktionen enthält:
     + Identitätsfunktionen:
         \begin{align*}
@@ -332,11 +334,12 @@ Monotonie, Stetigkeit, Striktheit
 
 Fixpunkte
 ---------
+* **Definition:** Fixpunkt von $f$
+    $$\underline{\mathit{fix}}(f) = f(\underline{\mathit{fix}}(f))$$
 * **Fixpunktsatz:** 
     * Geg.: cpo $A$ und $f \in [A \to A]$
     * minimaler Fixpunkt von $f$, $\underline{\mathit{fix}}(f)$ existiert in $A$ und es gilt
         $$\underline{\mathit{fix}}(f) = \bigsqcup\limits_{v \in \mathbb N} f^v(\bot)$$
-
 
 Elementare Bereiche
 -------------------
@@ -496,6 +499,7 @@ Getyptes Lambda Kalkül
         $$t \xrightarrow{\alpha} s \lor t \xrightarrow{\beta} s \lor t \xrightarrow{\delta} s \lor t \xrightarrow{\eta} s \Rightarrow t \rightarrow s$$
  * $\xrightarrow{*}$ ist die reflexive, transitive Hülle von $\rightarrow$
  * **Satz:** Seien $s, t \in \mathcal A_\lambda$: $t \xrightarrow{*} s \Rightarrow \llbracket t \rrbracket = \llbracket s \rrbracket$ ($\lambda$-Reduktionen sind semantikerhaltend) 
+ * **Definition:** *Normalformen* sind $\lambda$-Ausdrücke, die sich nicht weiter $\beta$-, $\delta$- oder $\eta$-reduziert werden können.
  * **Satz von Church/Rosser:** Seien $t, t_1, t_2 \in \mathcal A_\lambda$:
     $$t \xrightarrow{*} t_1 \land t \xrightarrow{*} t_2 \Rightarrow \exists s \in A_\lambda : t_1 \xrightarrow{*} s \land t_2 \xrightarrow{*} s$$
 
